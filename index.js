@@ -5,6 +5,8 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import userRoutes from "./routes/user.routes.js"
+import postRoutes from "./routes/post.routes.js"
+import messageRoutes from "./routes/message.routes.js"
 
 import connectDB from "./utils/dbConnection.js"
 
@@ -23,6 +25,8 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 app.use("/api/v1/user", userRoutes);
+app.use("/api/v1/post", postRoutes);
+app.use("/api/v1/message", messageRoutes);
 
 app.listen(PORT, () => {
     connectDB();
