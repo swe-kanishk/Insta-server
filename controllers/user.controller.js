@@ -46,7 +46,7 @@ export const login = async (req, res) => {
         });
     }
 
-    const user = await User.findOne({email});
+    let user = await User.findOne({email});
     if(!user) {
         return res.status(401).json({
             message: 'incorrect email or password!',
@@ -62,6 +62,7 @@ export const login = async (req, res) => {
         });
     }
     const token = jwt.sign({userId: user._id}, process.env.SECRET_KEY, {expiresIn: '1d'});
+
     const populatedPosts = await Promise.all(
         user.posts.map(async(postId) => {
             const post = await Post.findById(postId);
@@ -81,10 +82,11 @@ export const login = async (req, res) => {
         following: user.following,
         posts: user.posts
     }
-    return res.cookie('token', token, {httpOnly: true, sameSite: 'strict', maxAge: 1*24*60*60*1000}).json({
+    return res.cookie('token', token, {httpOnly: true, sameSite: 'Strict', maxAge: 1*24*60*60*1000}).json({
         message: `Welcome back ${user.username}`,
         success: true,
-        user
+        user,
+        token
     });
     } catch (err) {
         console.log(err)
@@ -105,7 +107,7 @@ export const logout = (_, res) => {
 export const getProfile = async(req, res) => {
     try {
         const userId = req.params.id;
-        const user = await User.findById(userId).select('-password')
+        const user = await User.findById(userId).populate({path:'posts', createdAt:-1}).populate('saved')
         return res.status(200).json({
             user,
             success: true
